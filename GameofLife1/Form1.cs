@@ -26,7 +26,6 @@ namespace GameofLife1
 
         // Generation count
         int generations = 0;
-
         public Form1()
         {
             InitializeComponent();
@@ -50,7 +49,7 @@ namespace GameofLife1
                     {
                         if (count < 2)
                         { scratchPad[x, y] = false; }
-                        if (count < 3)
+                        if (count > 3)
                         { scratchPad[x, y] = false; }
                         if (count == 2 || count == 3)
                         { scratchPad[x, y] = true; }
@@ -273,9 +272,63 @@ namespace GameofLife1
             graphicsPanel1.Invalidate();
 
         }
+        private void neighborCountToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (neighborCountToolStripMenuItem.Checked == true)
+                neighborCountToolStripMenuItem.Checked = false;
+            else if (neighborCountToolStripMenuItem.Checked == false)
+                neighborCountToolStripMenuItem.Checked = true;
+            graphicsPanel1.Invalidate();
+        }
+        private void startToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            timer.Enabled = true;
+        }
+
+        private void stopToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            timer.Enabled = false;
+        }
+
+        private void nextToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            NextGeneration();
+        }
+        private void backgroundColorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ColorDialog dlg = new ColorDialog();
+            dlg.Color = graphicsPanel1.BackColor;
+            if (DialogResult.OK == dlg.ShowDialog())
+            {
+                graphicsPanel1.BackColor = dlg.Color;
+                graphicsPanel1.Invalidate();
+            }
+        }
+
+        private void cellColorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ColorDialog dlg = new ColorDialog();
+            dlg.Color = cellColor;
+            if (DialogResult.OK == dlg.ShowDialog())
+            {
+                cellColor = dlg.Color;
+                graphicsPanel1.Invalidate();
+            }
+        }
+
+        private void gridColorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ColorDialog dlg = new ColorDialog();
+            dlg.Color = gridColor;
+            if (DialogResult.OK == dlg.ShowDialog())
+            {
+                gridColor = dlg.Color;
+                graphicsPanel1.Invalidate();
+            }
+        }
         #endregion
+
         #region toolStrips
-        //
         private void newToolStripButton_Click(object sender, EventArgs e)
         {
             bool[,] temp = new bool[5, 5];
@@ -298,10 +351,18 @@ namespace GameofLife1
         {
             NextGeneration();
         }
-        private void neighborCountToolStripMenuItem_Click(object sender, EventArgs e)
-        {
 
-        }
+
+
         #endregion
+
+        private void optionsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OptionsDialog dlg = new OptionsDialog();
+            if ( DialogResult.OK == dlg.ShowDialog())
+            {
+
+            }
+        }
     }
 }
