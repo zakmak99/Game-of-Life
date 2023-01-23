@@ -12,10 +12,9 @@ namespace GameofLife1
 {
     public partial class Form1 : Form
     {
-        
         // The universe array
-        bool[,] universe = new bool[5, 5];
-        bool[,] scratchPad = new bool[5, 5];
+        bool[,] universe = new bool[15, 15];
+        bool[,] scratchPad = new bool[15, 15];
 
         // Drawing colors
         Color gridColor = Color.Black;
@@ -29,7 +28,11 @@ namespace GameofLife1
         public Form1()
         {
             InitializeComponent();
-
+            graphicsPanel1.BackColor = Properties.Settings.Default.BackColor;
+            gridColor = Properties.Settings.Default.GridColor;
+            cellColor = Properties.Settings.Default.CellColor;
+            //gridX = Properties.Settings.Default.GridX;
+            //gridY = Properties.Settings.Default.GridY;
             // Setup the timer
             timer.Interval = 100; // milliseconds
             timer.Tick += Timer_Tick;
@@ -119,7 +122,7 @@ namespace GameofLife1
 
                     if (neighborCountToolStripMenuItem.Checked == true)
                     {
-                        Font font = new Font("Arial", 20f);
+                        Font font = new Font("Arial", 10f);
 
                         StringFormat stringFormat = new StringFormat();
                         stringFormat.Alignment = StringAlignment.Center;
@@ -266,9 +269,10 @@ namespace GameofLife1
 
         private void newToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            bool[,] temp = new bool[5, 5];
+            bool[,] temp = new bool[15, 15];
             universe = temp;
             generations = 0;
+            timer.Enabled = false;
             graphicsPanel1.Invalidate();
 
         }
@@ -301,7 +305,6 @@ namespace GameofLife1
             if (DialogResult.OK == dlg.ShowDialog())
             {
                 graphicsPanel1.BackColor = dlg.Color;
-                graphicsPanel1.Invalidate();
             }
         }
 
@@ -331,9 +334,10 @@ namespace GameofLife1
         #region toolStrips
         private void newToolStripButton_Click(object sender, EventArgs e)
         {
-            bool[,] temp = new bool[5, 5];
+            bool[,] temp = new bool[15, 15];
             universe = temp;
             generations = 0;
+            timer.Enabled = false;
             graphicsPanel1.Invalidate();
         }
 
@@ -359,10 +363,45 @@ namespace GameofLife1
         private void optionsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             OptionsDialog dlg = new OptionsDialog();
+            dlg.GridHeight = universe.GetLength(1);
+            dlg.GridWidth = universe.GetLength(0);
+            dlg.GenInterval = timer.Interval;
             if ( DialogResult.OK == dlg.ShowDialog())
             {
+                timer.Interval = dlg.GenInterval;
 
+                graphicsPanel1.Invalidate();
             }
+        }
+
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            Properties.Settings.Default.BackColor = graphicsPanel1.BackColor;
+            Properties.Settings.Default.CellColor = cellColor;
+            Properties.Settings.Default.GridColor = gridColor;
+            //Properties.Settings.Default.GridX = gridX;
+            //Properties.Settings.Default.GridY = gridY;
+            Properties.Settings.Default.Save();
+        }
+
+        private void resetToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.Reset();
+            graphicsPanel1.BackColor = Properties.Settings.Default.BackColor;
+            gridColor = Properties.Settings.Default.GridColor;
+            cellColor = Properties.Settings.Default.CellColor;
+            //gridX = Properties.Settings.Default.GridX;
+            //gridY = Properties.Settings.Default.GridY;
+        }
+
+        private void reloadToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.Reload();
+            graphicsPanel1.BackColor = Properties.Settings.Default.BackColor;
+            gridColor = Properties.Settings.Default.GridColor;
+            cellColor = Properties.Settings.Default.CellColor;
+            //gridX = Properties.Settings.Default.GridX;
+            //gridY = Properties.Settings.Default.GridY;
         }
     }
 }
