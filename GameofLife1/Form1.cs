@@ -12,6 +12,8 @@ namespace GameofLife1
 {
     public partial class Form1 : Form
     {
+        int gridX = 15;
+        int gridY = 15;
         // The universe array
         bool[,] universe = new bool[15, 15];
         bool[,] scratchPad = new bool[15, 15];
@@ -28,15 +30,20 @@ namespace GameofLife1
         public Form1()
         {
             InitializeComponent();
-            graphicsPanel1.BackColor = Properties.Settings.Default.BackColor;
-            gridColor = Properties.Settings.Default.GridColor;
-            cellColor = Properties.Settings.Default.CellColor;
-            //gridX = Properties.Settings.Default.GridX;
-            //gridY = Properties.Settings.Default.GridY;
             // Setup the timer
             timer.Interval = 100; // milliseconds
             timer.Tick += Timer_Tick;
             timer.Enabled = false; // start timer running
+
+            graphicsPanel1.BackColor = Properties.Settings.Default.BackColor;
+            gridColor = Properties.Settings.Default.GridColor;
+            cellColor = Properties.Settings.Default.CellColor;
+            gridX = Properties.Settings.Default.GridX;
+            gridY = Properties.Settings.Default.GridY;
+            timer.Interval = Properties.Settings.Default.GenInterval;
+            universe = new bool[gridX, gridY];
+            scratchPad = new bool[gridX, gridY];
+           
         }
 
         // Calculate the next generation of cells
@@ -363,12 +370,16 @@ namespace GameofLife1
         private void optionsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             OptionsDialog dlg = new OptionsDialog();
-            dlg.GridHeight = universe.GetLength(1);
-            dlg.GridWidth = universe.GetLength(0);
+            dlg.GridHeight = gridY;
+            dlg.GridWidth = gridX;
             dlg.GenInterval = timer.Interval;
             if ( DialogResult.OK == dlg.ShowDialog())
             {
+                gridX = dlg.GridWidth;
+                gridY = dlg.GridHeight;
                 timer.Interval = dlg.GenInterval;
+                universe = new bool[gridX, gridY];
+                scratchPad = new bool[gridX, gridY];
 
                 graphicsPanel1.Invalidate();
             }
@@ -379,8 +390,9 @@ namespace GameofLife1
             Properties.Settings.Default.BackColor = graphicsPanel1.BackColor;
             Properties.Settings.Default.CellColor = cellColor;
             Properties.Settings.Default.GridColor = gridColor;
-            //Properties.Settings.Default.GridX = gridX;
-            //Properties.Settings.Default.GridY = gridY;
+            Properties.Settings.Default.GridX = gridX;
+            Properties.Settings.Default.GridY = gridY;
+            Properties.Settings.Default.GenInterval = timer.Interval;
             Properties.Settings.Default.Save();
         }
 
@@ -390,8 +402,9 @@ namespace GameofLife1
             graphicsPanel1.BackColor = Properties.Settings.Default.BackColor;
             gridColor = Properties.Settings.Default.GridColor;
             cellColor = Properties.Settings.Default.CellColor;
-            //gridX = Properties.Settings.Default.GridX;
-            //gridY = Properties.Settings.Default.GridY;
+            gridX = Properties.Settings.Default.GridX;
+            gridY = Properties.Settings.Default.GridY;
+            timer.Interval = Properties.Settings.Default.GenInterval;
         }
 
         private void reloadToolStripMenuItem_Click(object sender, EventArgs e)
@@ -400,8 +413,9 @@ namespace GameofLife1
             graphicsPanel1.BackColor = Properties.Settings.Default.BackColor;
             gridColor = Properties.Settings.Default.GridColor;
             cellColor = Properties.Settings.Default.CellColor;
-            //gridX = Properties.Settings.Default.GridX;
-            //gridY = Properties.Settings.Default.GridY;
+            gridX = Properties.Settings.Default.GridX;
+            gridY = Properties.Settings.Default.GridY;
+            timer.Interval = Properties.Settings.Default.GenInterval;
         }
     }
 }

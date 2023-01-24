@@ -19,14 +19,8 @@ namespace GameofLife1
 
         public int GridHeight
         {
-            get
-            {
-                return (int)numericGridHeight.Value;
-            }
-            set
-            {
-                numericGridHeight.Value = value;
-            }
+            get { return (int)numericGridHeight.Value; }
+            set { numericGridHeight.Value = value; }
         }
         public int GridWidth
         {
