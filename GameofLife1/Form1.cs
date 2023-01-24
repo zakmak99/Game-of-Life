@@ -432,9 +432,13 @@ namespace GameofLife1
                     // Iterate through the universe in the x, left to right
                     for (int x = 0; x < universe.GetLength(0); x++)
                     {
-                       if ( rnd.Next(0, 2) == 1)
+                       if ( rnd.Next(0, 2) == 0)
                         {
                             universe[x, y] = true;
+                        }
+                       else
+                        {
+                            universe[x, y] = false;
                         }
                     }
                 }
@@ -444,7 +448,23 @@ namespace GameofLife1
 
         private void fromTimeToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            Random rnd = new Random();
+            for (int y = 0; y < universe.GetLength(1); y++)
+            {
+                // Iterate through the universe in the x, left to right
+                for (int x = 0; x < universe.GetLength(0); x++)
+                {
+                    if (rnd.Next(0, 2) == 0)
+                    {
+                        universe[x, y] = true;
+                    }
+                    else
+                    {
+                        universe[x, y] = false;
+                    }
+                }
+            }
+            graphicsPanel1.Invalidate();
         }
     }
 }
