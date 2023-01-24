@@ -276,7 +276,7 @@ namespace GameofLife1
 
         private void newToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            bool[,] temp = new bool[15, 15];
+            bool[,] temp = new bool[gridX, gridY];
             universe = temp;
             generations = 0;
             timer.Enabled = false;
@@ -341,7 +341,7 @@ namespace GameofLife1
         #region toolStrips
         private void newToolStripButton_Click(object sender, EventArgs e)
         {
-            bool[,] temp = new bool[15, 15];
+            bool[,] temp = new bool[gridX, gridY];
             universe = temp;
             generations = 0;
             timer.Enabled = false;
@@ -416,6 +416,35 @@ namespace GameofLife1
             gridX = Properties.Settings.Default.GridX;
             gridY = Properties.Settings.Default.GridY;
             timer.Interval = Properties.Settings.Default.GenInterval;
+        }
+
+        private void fromSeedToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            int seed = 0;
+            SeedDialog dlg = new SeedDialog();
+            dlg.Seed = seed;
+            if (DialogResult.OK == dlg.ShowDialog())
+            {
+                seed = dlg.Seed;
+                Random rnd = new Random(seed);
+                for (int y = 0; y < universe.GetLength(1); y++)
+                {
+                    // Iterate through the universe in the x, left to right
+                    for (int x = 0; x < universe.GetLength(0); x++)
+                    {
+                       if ( rnd.Next(0, 2) == 1)
+                        {
+                            universe[x, y] = true;
+                        }
+                    }
+                }
+                graphicsPanel1.Invalidate();
+            }
+        }
+
+        private void fromTimeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
