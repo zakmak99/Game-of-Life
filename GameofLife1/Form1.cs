@@ -12,6 +12,11 @@ namespace GameofLife1
 {
     public partial class Form1 : Form
     {
+        // Boundry Type
+        string boundryType;
+        // Alive cell count
+        int cellCount = 0;
+        // Default size values
         int gridX = 15;
         int gridY = 15;
         // The universe array
@@ -79,9 +84,11 @@ namespace GameofLife1
 
                     // Increment generation count
                     generations++;
-
+            CellCount();
             // Update status strip generations
             toolStripStatusLabelGenerations.Text = "Generations = " + generations.ToString();
+            // Update status strip living cells
+            toolStripStatusLabelCells.Text = "Living cells = " + cellCount.ToString();
             graphicsPanel1.Invalidate();
         }
 
@@ -95,9 +102,9 @@ namespace GameofLife1
         {
             // Calculate the width and height of each cell in pixels
             // CELL WIDTH = WINDOW WIDTH / NUMBER OF CELLS IN X
-            float cellWidth = (float)graphicsPanel1.ClientSize.Width / (float)universe.GetLength(0);
+            float cellWidth = (float)graphicsPanel1.ClientSize.Width / universe.GetLength(0);
             // CELL HEIGHT = WINDOW HEIGHT / NUMBER OF CELLS IN Y
-            float cellHeight = (float)graphicsPanel1.ClientSize.Height / (float)universe.GetLength(1);
+            float cellHeight = (float)graphicsPanel1.ClientSize.Height / universe.GetLength(1);
 
             // A Pen for drawing the grid lines (color, width)
             Pen gridPen = new Pen(gridColor, 1);
@@ -126,7 +133,7 @@ namespace GameofLife1
 
                     // Outline the cell with a pen
                     e.Graphics.DrawRectangle(gridPen, cellRect.X, cellRect.Y, cellRect.Width, cellRect.Height);
-
+                    // Prints the neighbor count in each cell
                     if (neighborCountToolStripMenuItem.Checked == true)
                     {
                         Font font = new Font("Arial", 10f);
@@ -135,14 +142,25 @@ namespace GameofLife1
                         stringFormat.Alignment = StringAlignment.Center;
                         stringFormat.LineAlignment = StringAlignment.Center;
 
-                        Rectangle rect = new Rectangle(x, y, 100, 100);
+                        Rectangle rect = new Rectangle(x, y, (int)cellRect.Width, (int)cellRect.Height);
                         int neighbors = CountNeighbors(x,y);
                         if (neighbors > 0)
                         {
                             e.Graphics.DrawString(neighbors.ToString(), font, Brushes.Black, cellRect, stringFormat);
                         }
                     }
+
+                    
                 }
+            }
+            //Displays the HUD if enabled
+            if (hUDToolStripMenuItem.Checked == true)
+            {
+                Font font = new Font("Arial", 15f);
+                StringFormat stringFormat = new StringFormat();
+                stringFormat.Alignment = StringAlignment.Near;
+                stringFormat.LineAlignment = StringAlignment.Far;
+                e.Graphics.DrawString("Alive Cells = " + cellCount.ToString() + "\nGeneration = " + generations.ToString() + "\nBoundry Type = " + boundryType + "\nUniverse Size: Width = " + gridX.ToString() + " Height = " + gridY.ToString(), font, Brushes.Red, graphicsPanel1.ClientRectangle, stringFormat);
             }
 
             // Cleaning up pens and brushes
@@ -156,8 +174,8 @@ namespace GameofLife1
             if (e.Button == MouseButtons.Left)
             {
                 // Calculate the width and height of each cell in pixels
-                float cellWidth = graphicsPanel1.ClientSize.Width / universe.GetLength(0);
-                float cellHeight = graphicsPanel1.ClientSize.Height / universe.GetLength(1);
+                float cellWidth = (float)graphicsPanel1.ClientSize.Width / universe.GetLength(0);
+                float cellHeight = (float)graphicsPanel1.ClientSize.Height / universe.GetLength(1);
 
                 // Calculate the cell that was clicked in
                 // CELL X = MOUSE X / CELL WIDTH
@@ -168,6 +186,9 @@ namespace GameofLife1
                 // Toggle the cell's state
                 universe[x, y] = !universe[x, y];
 
+                // Update alive cell count
+                CellCount();
+                toolStripStatusLabelCells.Text = "Living Cells = " + cellCount.ToString();
                 // Tell Windows you need to repaint
                 graphicsPanel1.Invalidate();
             }
@@ -238,24 +259,44 @@ namespace GameofLife1
             }
             return count;
         }
-
+        // Handles Neighbor count based off which box is checked
         private int CountNeighbors(int x, int y)
         {
             int count = 0;
             if (toroidalToolStripMenuItem.Checked)
-            {count = CountNeighborsToroidal(x,y); }
+            {
+                count = CountNeighborsToroidal(x,y);
+                boundryType = "Toroidal";
+            }
             if (finiteToolStripMenuItem.Checked)
-            { count = CountNeighborsFinite(x, y); }
+            { 
+                count = CountNeighborsFinite(x, y);
+                boundryType = "Finite";
+            }
 
             return count;
         }
+        //counts living cells
+        private void CellCount()
+        {
+            int alive = 0;
+            for (int y = 0; y < universe.GetLength(1); y++)
+            {
+                // Iterate through the universe in the x, left to right
+                for (int x = 0; x < universe.GetLength(0); x++)
+                {
+                    if (universe[x,y] == true) alive++;
+                }
+            }
+            cellCount = alive;
+        }
         #region menuItems
-
+        // Exits the program
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.Close();
         }
-
+        // Toggles the Finite switch off and checks the Toroidal switch
         private void toroidalToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (finiteToolStripMenuItem.Checked == true)
@@ -264,7 +305,7 @@ namespace GameofLife1
                 toroidalToolStripMenuItem.Checked = true;
             }
         }
-
+        // Toggle the Toroidal switch off and checks the Finite switch
         private void finiteToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (toroidalToolStripMenuItem.Checked == true)
@@ -273,16 +314,19 @@ namespace GameofLife1
                 finiteToolStripMenuItem.Checked = true;
             }
         }
-
+        // Wipes the universe and resets relevent counters
         private void newToolStripMenuItem_Click(object sender, EventArgs e)
         {
             bool[,] temp = new bool[gridX, gridY];
             universe = temp;
             generations = 0;
             timer.Enabled = false;
+            CellCount();
+            toolStripStatusLabelGenerations.Text = "Generations = " + generations.ToString();
+            toolStripStatusLabelCells.Text = "Living cells = " + cellCount.ToString();
             graphicsPanel1.Invalidate();
 
-        }
+        }// Toggles the switch and determines if the information is displayed
         private void neighborCountToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (neighborCountToolStripMenuItem.Checked == true)
@@ -291,20 +335,22 @@ namespace GameofLife1
                 neighborCountToolStripMenuItem.Checked = true;
             graphicsPanel1.Invalidate();
         }
+        // Enables the timer
         private void startToolStripMenuItem_Click(object sender, EventArgs e)
         {
             timer.Enabled = true;
         }
-
+        // Diables the timer
         private void stopToolStripMenuItem_Click(object sender, EventArgs e)
         {
             timer.Enabled = false;
         }
-
+        // Moves forward one generation
         private void nextToolStripMenuItem_Click(object sender, EventArgs e)
         {
             NextGeneration();
         }
+        // Displays the color dialog menu and updates the background color
         private void backgroundColorToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ColorDialog dlg = new ColorDialog();
@@ -314,7 +360,7 @@ namespace GameofLife1
                 graphicsPanel1.BackColor = dlg.Color;
             }
         }
-
+        // Displays the color dialog menu and updates the cell color
         private void cellColorToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ColorDialog dlg = new ColorDialog();
@@ -325,7 +371,7 @@ namespace GameofLife1
                 graphicsPanel1.Invalidate();
             }
         }
-
+        // Displays the color dialog menu and updates the grid color
         private void gridColorToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ColorDialog dlg = new ColorDialog();
@@ -336,66 +382,7 @@ namespace GameofLife1
                 graphicsPanel1.Invalidate();
             }
         }
-        #endregion
-
-        #region toolStrips
-        private void newToolStripButton_Click(object sender, EventArgs e)
-        {
-            bool[,] temp = new bool[gridX, gridY];
-            universe = temp;
-            generations = 0;
-            timer.Enabled = false;
-            graphicsPanel1.Invalidate();
-        }
-
-        private void toolStripButton1_Click(object sender, EventArgs e)
-        {
-            timer.Enabled = true;
-        }
-
-        private void toolStripButton2_Click(object sender, EventArgs e)
-        {
-            timer.Enabled = false;
-        }
-
-        private void toolStripButton3_Click(object sender, EventArgs e)
-        {
-            NextGeneration();
-        }
-
-
-
-        #endregion
-
-        private void optionsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            OptionsDialog dlg = new OptionsDialog();
-            dlg.GridHeight = gridY;
-            dlg.GridWidth = gridX;
-            dlg.GenInterval = timer.Interval;
-            if ( DialogResult.OK == dlg.ShowDialog())
-            {
-                gridX = dlg.GridWidth;
-                gridY = dlg.GridHeight;
-                timer.Interval = dlg.GenInterval;
-                universe = new bool[gridX, gridY];
-                scratchPad = new bool[gridX, gridY];
-
-                graphicsPanel1.Invalidate();
-            }
-        }
-
-        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            Properties.Settings.Default.BackColor = graphicsPanel1.BackColor;
-            Properties.Settings.Default.CellColor = cellColor;
-            Properties.Settings.Default.GridColor = gridColor;
-            Properties.Settings.Default.GridX = gridX;
-            Properties.Settings.Default.GridY = gridY;
-            Properties.Settings.Default.GenInterval = timer.Interval;
-            Properties.Settings.Default.Save();
-        }
-
+        // Loads the base values and resets the universe and counters
         private void resetToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Properties.Settings.Default.Reset();
@@ -405,8 +392,15 @@ namespace GameofLife1
             gridX = Properties.Settings.Default.GridX;
             gridY = Properties.Settings.Default.GridY;
             timer.Interval = Properties.Settings.Default.GenInterval;
+            universe = new bool[gridX, gridY];
+            timer.Enabled = false;
+            generations = 0;
+            cellCount = 0;
+            toolStripStatusLabelGenerations.Text = "Generations = " + generations.ToString();
+            toolStripStatusLabelCells.Text = "Living cells = " + cellCount.ToString();
+            graphicsPanel1.Invalidate();
         }
-
+        // Loads the settings from the last launch
         private void reloadToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Properties.Settings.Default.Reload();
@@ -416,8 +410,15 @@ namespace GameofLife1
             gridX = Properties.Settings.Default.GridX;
             gridY = Properties.Settings.Default.GridY;
             timer.Interval = Properties.Settings.Default.GenInterval;
+            universe = new bool[gridX, gridY];
+            timer.Enabled = false;
+            generations = 0;
+            cellCount = 0;
+            toolStripStatusLabelGenerations.Text = "Generations = " + generations.ToString();
+            toolStripStatusLabelCells.Text = "Living cells = " + cellCount.ToString();
+            graphicsPanel1.Invalidate();
         }
-
+        // gets the value input by the user and randomizes the univese based off of it
         private void fromSeedToolStripMenuItem_Click(object sender, EventArgs e)
         {
             int seed = 0;
@@ -432,20 +433,25 @@ namespace GameofLife1
                     // Iterate through the universe in the x, left to right
                     for (int x = 0; x < universe.GetLength(0); x++)
                     {
-                       if ( rnd.Next(0, 2) == 0)
+                        if (rnd.Next(0, 2) == 0)
                         {
                             universe[x, y] = true;
                         }
-                       else
+                        else
                         {
                             universe[x, y] = false;
                         }
                     }
                 }
+                timer.Enabled = false;
+                generations = 0;
+                CellCount();
+                toolStripStatusLabelGenerations.Text = "Generations = " + generations.ToString();
+                toolStripStatusLabelCells.Text = "Living cells = " + cellCount.ToString();
                 graphicsPanel1.Invalidate();
             }
         }
-
+        // Using the system time randomizes the universe
         private void fromTimeToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Random rnd = new Random();
@@ -464,7 +470,105 @@ namespace GameofLife1
                     }
                 }
             }
+            timer.Enabled = false;
+            generations = 0;
+            CellCount();
+            toolStripStatusLabelGenerations.Text = "Generations = " + generations.ToString();
+            toolStripStatusLabelCells.Text = "Living cells = " + cellCount.ToString();
             graphicsPanel1.Invalidate();
         }
+        // Displays the Options menu dialog and updates the changed information
+        private void optionsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OptionsDialog dlg = new OptionsDialog();
+            dlg.GridHeight = gridY;
+            dlg.GridWidth = gridX;
+            dlg.GenInterval = timer.Interval;
+            if (DialogResult.OK == dlg.ShowDialog())
+            {
+                if (gridX != dlg.GridWidth && gridY != dlg.GridHeight)
+                {
+                    gridX = dlg.GridWidth;
+                    gridY = dlg.GridHeight;
+                    universe = new bool[gridX, gridY];
+                    scratchPad = new bool[gridX, gridY];
+                    generations = 0;
+                    cellCount = 0;
+                    toolStripStatusLabelGenerations.Text = "Generations = " + generations.ToString();
+                    toolStripStatusLabelCells.Text = "Living cells = " + cellCount.ToString();
+                }
+
+                timer.Interval = dlg.GenInterval;
+                
+                timer.Enabled = false;
+                
+                graphicsPanel1.Invalidate();
+            }
+        }
+        // Toggles the HUD check and determines if the information is displayed
+        private void hUDToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (hUDToolStripMenuItem.Checked == true)
+            {
+                hUDToolStripMenuItem.Checked = false;
+                hUDToolStripMenuItem1.Checked = false;
+            }
+            else if (hUDToolStripMenuItem.Checked == false)
+            {
+                hUDToolStripMenuItem.Checked = true;
+                hUDToolStripMenuItem1.Checked = true;
+            }
+            graphicsPanel1.Invalidate();
+        }
+        #endregion
+
+        #region toolStrips
+        //         // Wipes the universe and resets relevent counters
+        private void newToolStripButton_Click(object sender, EventArgs e)
+        {
+            bool[,] temp = new bool[gridX, gridY];
+            universe = temp;
+            generations = 0;
+            cellCount = 0;
+            timer.Enabled = false;
+            toolStripStatusLabelGenerations.Text = "Generations = " + generations.ToString();
+            toolStripStatusLabelCells.Text = "Living cells = " + cellCount.ToString();
+            graphicsPanel1.Invalidate();
+        }
+        // Enables the timer
+        private void toolStripButton1_Click(object sender, EventArgs e)
+        {
+            timer.Enabled = true;
+        }
+        // Disables the timer
+        private void toolStripButton2_Click(object sender, EventArgs e)
+        {
+            timer.Enabled = false;
+        }
+        // Advamces the universe by one generation
+        private void toolStripButton3_Click(object sender, EventArgs e)
+        {
+            NextGeneration();
+        }
+
+
+
+        #endregion
+
+        
+        //Saves setting upon closing program
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            Properties.Settings.Default.BackColor = graphicsPanel1.BackColor;
+            Properties.Settings.Default.CellColor = cellColor;
+            Properties.Settings.Default.GridColor = gridColor;
+            Properties.Settings.Default.GridX = gridX;
+            Properties.Settings.Default.GridY = gridY;
+            Properties.Settings.Default.GenInterval = timer.Interval;
+            Properties.Settings.Default.Save();
+        }
+
+
+
     }
 }
