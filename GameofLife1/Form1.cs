@@ -20,7 +20,7 @@ namespace GameofLife1
         // Default size values
         int gridX = 15;
         int gridY = 15;
-        // The universe array
+        // The universe array]
         bool[,] universe = new bool[15, 15];
         bool[,] scratchPad = new bool[15, 15];
 
@@ -305,6 +305,7 @@ namespace GameofLife1
                 finiteToolStripMenuItem.Checked = false;
                 toroidalToolStripMenuItem.Checked = true;
             }
+            graphicsPanel1.Invalidate();
         }
         // Toggle the Toroidal switch off and checks the Finite switch
         private void finiteToolStripMenuItem_Click(object sender, EventArgs e)
@@ -314,6 +315,7 @@ namespace GameofLife1
                 toroidalToolStripMenuItem.Checked = false;
                 finiteToolStripMenuItem.Checked = true;
             }
+            graphicsPanel1.Invalidate();
         }
         // Wipes the universe and resets relevent counters
         private void newToolStripMenuItem_Click(object sender, EventArgs e)
@@ -647,7 +649,7 @@ namespace GameofLife1
             }
             // Update displayed values
             generations = 0;
-            cellCount = 0;
+            CellCount();
             timer.Enabled = false;
             toolStripStatusLabelGenerations.Text = "Generations = " + generations.ToString();
             toolStripStatusLabelCells.Text = "Living cells = " + cellCount.ToString();
